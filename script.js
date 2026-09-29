@@ -6,6 +6,25 @@ const resetBtn = document.getElementById('reset');
 // ===== Game state =====
 let state;
 
+// ===== Win detection (works for small boards AND the big board) =====
+const WIN_LINES = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+  [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+  [0, 4, 8], [2, 4, 6],            // diagonals
+];
+
+function checkWinner(cells) {
+  for (const [a, b, c] of WIN_LINES) {
+    const mark = cells[a];
+    if ((mark === 'X' || mark === 'O') && mark === cells[b] && mark === cells[c]) {
+      return mark;
+    }
+  }
+  if (cells.every(cell => cell !== null)) return 'draw';
+  return null; // still in play
+}
+
+
 function newGameState() {
   return {
     cells: Array.from({ length: 9 }, () => Array(9).fill(null)), // cells[board][cell]
@@ -39,6 +58,12 @@ function buildBoard() {
 // ===== Draw the screen from the state =====
 function render() {
   for (let b = 0; b < 9; b++) {
+    const smallEl = bigBoard.querySelector(`.small-board[data-board="${b}"]`);
+    const result = state.boardWinners[b];
+    smallEl.classList.toggle('won-x', result === 'X');
+    smallEl.classList.toggle('won-o', result === 'O');
+    smallEl.classList.toggle('drawn', result === 'draw');
+
     for (let c = 0; c < 9; c++) {
       const cellEl = bigBoard.querySelector(`.cell[data-board="${b}"][data-cell="${c}"]`);
       const mark = state.cells[b][c];
@@ -58,14 +83,16 @@ function handleClick(event) {
   const b = Number(cellEl.dataset.board);
   const c = Number(cellEl.dataset.cell);
 
-  if (state.cells[b][c] !== null) return; // cell already taken
+if (state.boardWinners[b] !== null) return; // board already decided
+  if (state.cells[b][c] !== null) return;      // cell already taken
 
   state.cells[b][c] = state.currentPlayer;
+  state.boardWinners[b] = checkWinner(state.cells[b]);
+
   state.currentPlayer = state.currentPlayer === 'X' ? 'O' : 'X';
   render();
 }
 
-// ===== Start / restart =====
 function startGame() {
   state = newGameState();
   render();
