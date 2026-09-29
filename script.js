@@ -24,6 +24,19 @@ function checkWinner(cells) {
   return null; // still in play
 }
 
+// ===== Board rules =====
+const BOARD_NAMES = [
+  'top-left', 'top-center', 'top-right',
+  'middle-left', 'center', 'middle-right',
+  'bottom-left', 'bottom-center', 'bottom-right',
+];
+
+function isPlayableBoard(b) {
+  if (state.gameWinner !== null) return false;    // game over
+  if (state.boardWinners[b] !== null) return false; // board already decided
+  return state.activeBoard === null || state.activeBoard === b;
+}
+
 
 function newGameState() {
   return {
@@ -60,9 +73,12 @@ function render() {
   for (let b = 0; b < 9; b++) {
     const smallEl = bigBoard.querySelector(`.small-board[data-board="${b}"]`);
     const result = state.boardWinners[b];
+    const playable = isPlayableBoard(b);
+
     smallEl.classList.toggle('won-x', result === 'X');
     smallEl.classList.toggle('won-o', result === 'O');
     smallEl.classList.toggle('drawn', result === 'draw');
+    smallEl.classList.toggle('playable', playable);
 
     for (let c = 0; c < 9; c++) {
       const cellEl = bigBoard.querySelector(`.cell[data-board="${b}"][data-cell="${c}"]`);
@@ -70,9 +86,15 @@ function render() {
       cellEl.textContent = mark ?? '';
       cellEl.classList.toggle('x', mark === 'X');
       cellEl.classList.toggle('o', mark === 'O');
+      cellEl.disabled = !playable || mark !== null;
     }
   }
-  statusEl.textContent = `Player ${state.currentPlayer}'s turn`;
+
+  if (state.activeBoard === null) {
+    statusEl.textContent = `Player ${state.currentPlayer}: choose any open board`;
+  } else {
+    statusEl.textContent = `Player ${state.currentPlayer}: play in the ${BOARD_NAMES[state.activeBoard]} board`;
+  }
 }
 
 // ===== Handle a click on any cell =====
@@ -83,11 +105,19 @@ function handleClick(event) {
   const b = Number(cellEl.dataset.board);
   const c = Number(cellEl.dataset.cell);
 
-if (state.boardWinners[b] !== null) return; // board already decided
-  if (state.cells[b][c] !== null) return;      // cell already taken
+  if (!isPlayableBoard(b)) return;        // wrong board, or board decided
+  if (state.cells[b][c] !== null) return; // cell already taken
+
+  const wasFreeMove = state.activeBoard === null;
 
   state.cells[b][c] = state.currentPlayer;
   state.boardWinners[b] = checkWinner(state.cells[b]);
+
+  if (wasFreeMove && state.boardWinners[b] === null) {
+    state.activeBoard = b;    // free move → opponent must answer in this board
+  } else {
+    state.activeBoard = null; // forced move, or board just closed → opponent chooses
+  }
 
   state.currentPlayer = state.currentPlayer === 'X' ? 'O' : 'X';
   render();
