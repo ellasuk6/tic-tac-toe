@@ -89,8 +89,17 @@ function render() {
       cellEl.disabled = !playable || mark !== null;
     }
   }
+  
+  const over = state.gameWinner !== null;
+  statusEl.classList.toggle('game-over', over);
+  statusEl.classList.toggle('win-x', state.gameWinner === 'X');
+  statusEl.classList.toggle('win-o', state.gameWinner === 'O');
 
-  if (state.activeBoard === null) {
+  if (state.gameWinner === 'X' || state.gameWinner === 'O') {
+    statusEl.textContent = `Player ${state.gameWinner} wins! Click New Game to play again.`;
+  } else if (state.gameWinner === 'draw') {
+    statusEl.textContent = `It's a draw! Click New Game to play again.`;
+  } else if (state.activeBoard === null) {
     statusEl.textContent = `Player ${state.currentPlayer}: choose any open board`;
   } else {
     statusEl.textContent = `Player ${state.currentPlayer}: play in the ${BOARD_NAMES[state.activeBoard]} board`;
@@ -105,13 +114,19 @@ function handleClick(event) {
   const b = Number(cellEl.dataset.board);
   const c = Number(cellEl.dataset.cell);
 
-  if (!isPlayableBoard(b)) return;        // wrong board, or board decided
+  if (!isPlayableBoard(b)) return;        // wrong board, board decided, or game over
   if (state.cells[b][c] !== null) return; // cell already taken
 
   const wasFreeMove = state.activeBoard === null;
 
   state.cells[b][c] = state.currentPlayer;
   state.boardWinners[b] = checkWinner(state.cells[b]);
+  state.gameWinner = checkWinner(state.boardWinners);
+
+  if (state.gameWinner !== null) {
+    render(); // game over: don't pass the turn
+    return;
+  }
 
   if (wasFreeMove && state.boardWinners[b] === null) {
     state.activeBoard = b;    // free move → opponent must answer in this board
