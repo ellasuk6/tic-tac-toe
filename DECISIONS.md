@@ -107,3 +107,33 @@ Every choice that had a real alternative. Newest at the bottom.
 **Decision:** No `.env.example` yet. It arrives in Stage 4 with `DATABASE_URL`, the first setting either app reads.
 **Alternative:** Add empty example files now.
 **Why not:** An example file listing no variables documents nothing.
+
+## D15 — Rules engine is pure functions over an immutable game state
+**Date:** 2026-10-01
+**Decision:** `app/services/rules.py` has no database or HTTP code. `apply_move(state, move)` returns a new frozen `GameState`; `replay(moves)` rebuilds any game from its move list (see D4).
+**Alternative:** A `Game` class that changes its own board in place, or rules mixed into the service that saves to the database.
+**Why not:** Pure functions can be tested exhaustively with no setup, and a refused move cannot leave a half-changed board behind.
+
+## D16 — Domain enums live in `app/models/enums.py`
+**Date:** 2026-10-01
+**Decision:** `Player`, `BoardStatus`, and `GameStatus` are `StrEnum`s in a models file that imports nothing from SQLAlchemy.
+**Alternative:** Put them in `app/core/` or inside `rules.py`.
+**Why not:** The constitution puts `StrEnum`s in the model layer; keeping the file SQLAlchemy-free lets the pure rules engine import it too.
+
+## D17 — Two separate error codes for "wrong board"
+**Date:** 2026-10-01
+**Decision:** `board_not_playable` when the player was sent to a different board; `board_decided` when the player had a free move but chose a won or full board.
+**Alternative:** One code for both.
+**Why not:** They are different mistakes and the message to the player differs ("you must play in board E" vs "board A is already decided").
+
+## D18 — Out-of-range board or cell numbers are a programming error in the rules layer
+**Date:** 2026-10-01
+**Decision:** `Move` raises `ValueError` for numbers outside 0–8. The API schema (Stage 5) rejects them first with a `422`.
+**Alternative:** A domain error with its own `409` code.
+**Why not:** The constitution says schema failures are `422`, never a business-rule `409`.
+
+## D19 — Error messages use the professor's names
+**Date:** 2026-10-01
+**Decision:** Human-readable `detail` text names boards A–I and cells 1–9 (A16). Codes and the API still use 0–8.
+**Alternative:** Use 0–8 in messages too.
+**Why not:** The messages are shown to players, who see A–I and 1–9 on screen.
