@@ -8,6 +8,9 @@ services:
     build:
       context: ./backend
       dockerfile: ../infra/docker/backend.Dockerfile
+    environment:
+      # Four slashes = absolute path inside the container (on the named volume below).
+      DATABASE_URL: sqlite:////app/data/uttt.db
     volumes:
       - backend-data:/app/data
     # Not published to your Mac: only nginx (frontend) talks to the backend.

@@ -25,8 +25,10 @@ WORKDIR /app
 COPY pyproject.toml uv.lock .python-version ./
 RUN uv sync --locked --no-dev
 
-# Then the application code.
+# Then the application code and the database migrations.
 COPY app ./app
+COPY alembic.ini ./
+COPY alembic ./alembic
 
 # ---------- runtime ----------
 FROM python:3.14-slim-trixie AS runtime
@@ -45,4 +47,6 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 USER app
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Bring the database up to date, then start the server. `exec` makes uvicorn the
+# main process, so Control + C / `docker compose down` stops it cleanly.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

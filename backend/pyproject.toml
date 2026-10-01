@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Ultimate Tic-Tac-Toe API (COSC 410 warmup)"
 requires-python = ">=3.13"
 dependencies = [
+    "alembic>=1.20.0",
     "fastapi>=0.142.2",
+    "sqlalchemy>=2.1.1",
     "uvicorn>=0.54.0",
 ]
 
@@ -32,6 +34,11 @@ line-length = 100
 [tool.ruff.lint]
 # E/F: real errors, I: import order, UP: modern syntax, B: likely bugs, SIM: simpler code
 select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+# Our migrations folder is named "alembic", like the library. Tell Ruff which is which.
+known-first-party = ["app"]
+known-third-party = ["alembic"]
 
 [tool.mypy]
 strict = true
