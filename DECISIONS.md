@@ -77,3 +77,33 @@ Every choice that had a real alternative. Newest at the bottom.
 **Decision:** Ruff checks `E, F, I, UP, B, SIM` with a 100-character line length.
 **Alternative:** Ruff's defaults (`E, F` only, 88 characters).
 **Why not:** The extra rules catch import order, outdated syntax, and likely bugs at no cost.
+
+## D10 — TypeScript pinned to 5.9.x
+**Date:** 2026-09-30
+**Decision:** `"typescript": "~5.9.3"` (patch updates only).
+**Alternative:** The newest TypeScript, which is now 7.0.
+**Why not:** The constitution locks TypeScript 5.x.
+
+## D11 — nginx proxies `/api/` to the backend; the backend port is not published
+**Date:** 2026-09-30
+**Decision:** The browser only talks to nginx on port 8080. nginx serves the React files and forwards `/api/` to `backend:8000` on the Docker network.
+**Alternative:** Publish the backend on its own port and enable CORS in FastAPI.
+**Why not:** One origin means no CORS setup, and the backend is not exposed to anything but nginx.
+
+## D12 — Non-root nginx via `nginxinc/nginx-unprivileged`
+**Date:** 2026-09-30
+**Decision:** The frontend runtime image is NGINX's own unprivileged image (runs as user `nginx`, listens on 8080).
+**Alternative:** The standard `nginx` image modified by hand to drop root.
+**Why not:** The constitution requires non-root users; the unprivileged image does this correctly out of the box.
+
+## D13 — nginx.conf is baked into the image through a second build context
+**Date:** 2026-09-30
+**Decision:** Compose passes `./infra/docker` to the frontend build as an extra context named `infra`, and the Dockerfile copies `nginx.conf` from it.
+**Alternative:** Mount `nginx.conf` into the container as a volume at run time.
+**Why not:** A mounted file makes the image depend on the host's files; the constitution's layout keeps nginx.conf in `infra/docker/` but the image should be self-contained.
+
+## D14 — `.env.example` files deferred to the database stage
+**Date:** 2026-09-30
+**Decision:** No `.env.example` yet. It arrives in Stage 4 with `DATABASE_URL`, the first setting either app reads.
+**Alternative:** Add empty example files now.
+**Why not:** An example file listing no variables documents nothing.

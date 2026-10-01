@@ -1,0 +1,77 @@
+# Start everything:   docker compose up --build
+# Then open:          http://localhost:8080
+# Stop:               Control + C, then  docker compose down
+# Delete saved games: docker compose down -v   (removes the database volume)
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infra/docker/backend.Dockerfile
+    volumes:
+      - backend-data:/app/data
+    # Not published to your Mac: only nginx (frontend) talks to the backend.
+    expose:
+      - "8000"
+    healthcheck:
+      # The slim Python image has no curl, so Python itself checks the health endpoint.
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - app
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infra/docker/frontend.Dockerfile
+      additional_contexts:
+        infra: ./infra/docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    networks:
+      - app
+
+  # PostgreSQL, ready but off. To use it: uncomment this service and the
+  # "postgres-data" volume, then point the backend's DATABASE_URL at
+  # postgresql+psycopg://uttt:uttt@db:5432/uttt
+  #
+  # db:
+  #   image: postgres:17-alpine
+  #   environment:
+  #     POSTGRES_USER: uttt
+  #     POSTGRES_PASSWORD: uttt
+  #     POSTGRES_DB: uttt
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U uttt"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - app
+
+networks:
+  app:
+
+volumes:
+  backend-data:
+  # postgres-data:
