@@ -1,4 +1,4 @@
-# Ultimate Tic-Tac-Toe (COSC 410 warmup)
+# Ultimate Tic-Tac-Toe
 
 Two players, X and O, share one computer and play Ultimate Tic-Tac-Toe in the browser:
 a 3x3 grid of small tic-tac-toe boards (81 cells).
@@ -22,24 +22,15 @@ docker compose down -v    # stop and delete all saved games
 
 ## The rules, as implemented
 
-Boards are named A–I and cells 1–9, row by row:
-
-```
-A | B | C        1 | 2 | 3
-D | E | F        4 | 5 | 6
-G | H | I        7 | 8 | 9
-```
-
 - X moves first and may play anywhere.
-- **The cell you play picks the board your opponent must play in next.** Cell 5 (center)
-  of any board sends the opponent to board E; cell 7 sends them to board G.
+- **The cell you play picks the board your opponent must play in next.** 
 - A small board is won with three in a row. A full board with no winner is a draw. A won or
   drawn board accepts no more moves.
 - If you would be sent to a won or drawn board, you may instead play in any open board.
 - Win three small boards in a row (row, column, or diagonal) to win the game. Drawn boards
   never count toward a line.
 - If every board is decided and nobody has three in a row, the game is a draw.
-- **New Game** starts over at any time. A game's address (`/games/{id}`) survives a refresh.
+- **New Game** starts over at any time. A game's address survives a refresh.
 
 The open questions about these requirements, and the assumptions made for each, are in
 [`DECISIONS.md`](DECISIONS.md) (entries D2 and D3).
