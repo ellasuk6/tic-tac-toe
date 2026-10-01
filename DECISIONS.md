@@ -13,34 +13,8 @@ Every choice that had a real alternative. Newest at the bottom.
 ## D2 — Move placement rule: the professor's statement overrides the earlier notes and the prototype
 **Date:** 2026-09-30
 **Decision:** The **cell** index of a move (0–8) sets the board the opponent must play in next, on every move. If that board is already decided (won or full), the opponent may play any open cell in any undecided board.
-**Alternative:** The rule in the original notes and in `script.js`: the opponent is forced into the same **board**, and forced moves alternate with free moves.
-**Why not:** The product owner described the cell-based rule directly, with worked examples. `script.js` remains the reference for every other rule (win lines, decided boards, drawn boards not counting toward a line, game draw).
-
-## D3 — Open product questions resolved by the team, NOT confirmed by the product owner
-**Date:** 2026-09-30
-**Decision:** With a Friday 1:00 p.m. deadline, the team chose the simplest reasonable answer for each open question. These are team assumptions, not product-owner answers. If the product owner answers differently, these are the first things to change.
-
-| # | Question | Team assumption |
-|---|---|---|
-| A1 | Persistence | Games are saved in SQLite and survive a restart. The game id is in the page URL, so refreshing the page keeps the game. |
-| A2 | List of past games | None. |
-| A3 | New game mid-game | Starts immediately, no confirmation. The old game stays in the database untouched. |
-| A4 | Move history | Not shown. |
-| A5 | Undo | None. |
-| A6 | Early termination | A small board is decided only when won or full. The game is a draw only when all 9 boards are decided with no line. |
-| A7 | Illegal moves | The UI disables cells that cannot be played. The server still refuses them with a `409`, and the UI shows that message if one ever arrives. |
-| A8 | Turn information | The UI shows whose turn it is and which board to play in (or "any open board"), and highlights playable boards. |
-| A9 | After game over | The board freezes and a win or draw message is shown with the New Game button. |
-| A10 | Winning-line highlight | None. |
-| A11 | Player labels | "X" and "O" only. |
-| A12 | Phone layout | No special mobile work beyond no horizontal scrolling. |
-| A13 | Keyboard play | Every cell is a native button reachable with Tab. No arrow-key grid navigation. |
-| A14 | First move | X moves first, and the first move is free (any board). |
-| A15 | "Any spot" after being sent to a decided board | Any open cell in any undecided board. |
-| A16 | Board and cell names | The UI uses the professor's names: boards A–I, cells 1–9. The API uses indices 0–8. |
-
-**Alternative:** Wait for the product owner to answer each question.
-**Why not:** There is not enough time before the deadline.
+**Alternative:** the opponent is forced into the same **board**, and forced moves alternate with free moves.
+**Why not:** `script.js` remains the reference for every other rule (win lines, decided boards, drawn boards not counting toward a line, game draw).
 
 ## D4 — Store only moves; compute all game state
 **Date:** 2026-09-30
@@ -52,7 +26,7 @@ Every choice that had a real alternative. Newest at the bottom.
 **Date:** 2026-09-30
 **Decision:** GitHub Actions is not built unless the team approves it after the app is complete.
 **Alternative:** Build CI early, as the constitution describes.
-**Why not:** The product owner has not confirmed CI is required, and the deadline is short.
+**Why not:** The product owner has not confirmed CI is required.
 
 ## D6 — Async API tests run on anyio's pytest plugin
 **Date:** 2026-09-30
@@ -132,11 +106,6 @@ Every choice that had a real alternative. Newest at the bottom.
 **Alternative:** A domain error with its own `409` code.
 **Why not:** The constitution says schema failures are `422`, never a business-rule `409`.
 
-## D19 — Error messages use the professor's names
-**Date:** 2026-10-01
-**Decision:** Human-readable `detail` text names boards A–I and cells 1–9 (A16). Codes and the API still use 0–8.
-**Alternative:** Use 0–8 in messages too.
-**Why not:** The messages are shown to players, who see A–I and 1–9 on screen.
 
 ## D20 — The player is not stored on a move
 **Date:** 2026-10-01
