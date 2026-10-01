@@ -17,7 +17,9 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:cov": "vitest run --coverage",
-    "gen:api": "uv run --directory ../backend python -c \"import json, app.main as m; print(json.dumps(m.app.openapi(), indent=2))\" > openapi.json && openapi-typescript openapi.json -o src/api/schema.d.ts"
+    "gen:api": "uv run --directory ../backend python -c \"import json, app.main as m; print(json.dumps(m.app.openapi(), indent=2))\" > openapi.json && openapi-typescript openapi.json -o src/api/schema.d.ts",
+    "test:e2e": "playwright test",
+    "e2e:install": "playwright install chromium"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.0",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",

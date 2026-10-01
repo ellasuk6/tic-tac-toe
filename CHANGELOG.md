@@ -11,6 +11,7 @@
 - Database: SQLAlchemy models for games and moves, first Alembic migration (run automatically when the backend container starts), repository functions, `DATABASE_URL` setting and `backend/.env.example`.
 - API: `POST /api/v1/games`, `GET /api/v1/games/{id}`, `POST /api/v1/games/{id}/moves`, with the `{code, detail}` error envelope on every error (404, 409, 422).
 - Game UI: start page, game page at `/games/{id}` (survives refresh), 81-cell board with playable boards highlighted, win/draw messages, server error messages, New Game. Typed API client generated from the backend's OpenAPI schema. 26 frontend tests.
+- Playwright end-to-end smoke tests against the Docker Compose app; README with run, rules, API, and test instructions.
 
 ### Removed
 - Plain-JavaScript prototype files from `main` (preserved at tag `prototype-vanilla-js`).

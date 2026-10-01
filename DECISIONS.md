@@ -275,3 +275,15 @@ Every choice that had a real alternative. Newest at the bottom.
 **Decision:** Decided boards show "Won by X", "Won by O", or "Draw" in text; the board to play in is named in the status line as well as highlighted; X and O are letters, not just colors; every cell has a spoken label like "Board E, cell 5, empty".
 **Alternative:** Color-coded boards and marks only.
 **Why not:** The constitution's accessibility floor.
+
+## D43 — No CI for this assignment (closes D5)
+**Date:** 2026-10-01
+**Decision:** No `.github/workflows/ci.yml`. The team decided CI is not needed for the warmup.
+**Alternative:** The constitution's GitHub Actions workflow (lint, typecheck, and test both sides on every push).
+**Why not:** The product owner has not required it for this assignment. All the same checks are documented in the README and were run by hand before each commit.
+
+## D44 — End-to-end tests run against the app already started with Docker Compose
+**Date:** 2026-10-01
+**Decision:** `pnpm test:e2e` expects `docker compose up` to be running and tests `http://localhost:8080` (override with `E2E_BASE_URL`). Two happy-path tests: the professor's example move plus a page refresh, and a complete game to an X win.
+**Alternative:** Let Playwright start the backend and the Vite dev server by itself (`webServer`).
+**Why not:** Testing the real Docker stack (nginx, the built frontend, migrations on start) is what the product owner grades. A full drawn game is not tested end to end; draws are covered by the backend and frontend tests.
