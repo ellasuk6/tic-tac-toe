@@ -215,3 +215,63 @@ Every choice that had a real alternative. Newest at the bottom.
 **Decision:** `tests/game_sequences.py` holds the legal move sequences used by the rules, service, and API tests.
 **Alternative:** Copy them into each test file.
 **Why not:** A copied 25-move sequence could silently drift between files.
+
+## D33 — Frontend tool versions: locked majors where the constitution names one
+**Date:** 2026-10-01
+**Decision:** Vitest 4.1, MSW 2.15, ESLint 9.39, and TypeScript 5.9, even though Vitest 5, MSW 3, ESLint 10, and TypeScript 7 exist. React Router 8 and TanStack Query 5 are the current majors, as the constitution asks.
+**Alternative:** The newest version of everything.
+**Why not:** The constitution locks those majors for every team.
+
+## D34 — The OpenAPI snapshot and generated types are committed
+**Date:** 2026-10-01
+**Decision:** `frontend/openapi.json` (exported from the backend) and `frontend/src/api/schema.d.ts` (generated from it) are committed. `pnpm gen:api` regenerates both after any backend API change.
+**Alternative:** Generate the types during every frontend build.
+**Why not:** The frontend Docker build would then need the whole backend. Committing them also makes API changes visible in code review.
+
+## D35 — The API client looks up `fetch` on every call
+**Date:** 2026-10-01
+**Decision:** `createClient({ fetch: (request) => globalThis.fetch(request) })`.
+**Alternative:** openapi-fetch's default, which saves `fetch` once when the module loads.
+**Why not:** MSW replaces `fetch` after modules load, so with the default every test request escaped to the real network ("fetch failed"). Browsers behave the same either way.
+
+## D36 — pnpm is told not to run msw's install script
+**Date:** 2026-10-01
+**Decision:** `allowBuilds: { msw: false }` in `frontend/pnpm-workspace.yaml`.
+**Alternative:** Allow the script.
+**Why not:** pnpm 12 fails `pnpm install` (including the Docker build) on any unreviewed install script. msw's only copies a browser helper file; our tests run msw in Node and do not need it.
+
+## D37 — Tests use a small fake backend built with MSW
+**Date:** 2026-10-01
+**Decision:** `src/test/server.ts` has handlers for every endpoint and an in-memory list of games, so UI tests can click through moves. It records moves and points the next player at the board matching the cell, but does not check rules. Individual tests swap in 404, 409, 500, and 502 answers.
+**Alternative:** Fixed responses only.
+**Why not:** User-flow tests need the board to change after a click. The real rules are tested in the backend; the frontend applies none.
+
+## D38 — The UI applies no game rules
+**Date:** 2026-10-01
+**Decision:** A cell is clickable only if the server's `playable_boards` contains its board, the cell is empty, and no move is being sent. Status text comes from the server's `status`, `current_player`, and `forced_board`.
+**Alternative:** Recompute legal moves in the browser.
+**Why not:** The rules would then live in two places and could disagree.
+
+## D39 — A start page with a New Game button
+**Date:** 2026-10-01
+**Decision:** `/` shows the title, a one-paragraph explanation, and New Game. New Game creates the game and opens `/games/{id}`.
+**Alternative:** Create a game automatically whenever `/` is opened.
+**Why not:** Every visit or refresh of `/` would leave an unused game in the database.
+
+## D40 — No client-side validation tests
+**Date:** 2026-10-01
+**Decision:** The constitution's per-rule validation-message tests are not written.
+**Alternative:** n/a
+**Why not:** The app has no form inputs. Moves are buttons, and the server is the only judge of a move.
+
+## D41 — `frontend/.env.example` documents the dev proxy
+**Date:** 2026-10-01
+**Decision:** `pnpm dev` forwards `/api` to `API_PROXY_TARGET` (default `http://127.0.0.1:8000`). This closes D14.
+**Alternative:** Hard-code the backend address.
+**Why not:** The constitution requires `.env.example` in both apps, and the address is the only frontend setting.
+
+## D42 — Nothing is shown by color alone
+**Date:** 2026-10-01
+**Decision:** Decided boards show "Won by X", "Won by O", or "Draw" in text; the board to play in is named in the status line as well as highlighted; X and O are letters, not just colors; every cell has a spoken label like "Board E, cell 5, empty".
+**Alternative:** Color-coded boards and marks only.
+**Why not:** The constitution's accessibility floor.

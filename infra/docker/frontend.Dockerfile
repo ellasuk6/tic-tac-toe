@@ -15,7 +15,7 @@ RUN corepack enable
 WORKDIR /app
 
 # Dependencies first: this layer is cached until package.json or the lockfile changes.
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Then the source, then the production build.

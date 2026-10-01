@@ -1,0 +1,380 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Ultimate Tic-Tac-Toe API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Get Health",
+        "operationId": "get_health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games": {
+      "post": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Start a new game",
+        "operationId": "create_game_api_v1_games_post",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games/{game_id}": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Get a game's current state",
+        "operationId": "get_game_api_v1_games__game_id__get",
+        "parameters": [
+          {
+            "name": "game_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Game Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No game with this id (`game_not_found`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request failed validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games/{game_id}/moves": {
+      "post": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Play a move for whoever's turn it is",
+        "operationId": "play_move_api_v1_games__game_id__moves_post",
+        "parameters": [
+          {
+            "name": "game_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Game Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameOut"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No game with this id (`game_not_found`).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A game rule refused the move: `game_over`, `board_not_playable`, `board_decided`, `cell_occupied`, or `move_conflict`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "The request failed validation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BoardStatus": {
+        "type": "string",
+        "enum": [
+          "open",
+          "x_won",
+          "o_won",
+          "draw"
+        ],
+        "title": "BoardStatus",
+        "description": "Status of one small board."
+      },
+      "ErrorOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "examples": [
+              "cell_occupied"
+            ]
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "examples": [
+              "Cell 5 of board E is already taken."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "detail"
+        ],
+        "title": "ErrorOut",
+        "description": "The one error shape every endpoint uses."
+      },
+      "GameOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/GameStatus"
+          },
+          "current_player": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Player"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Whose turn it is; null once the game is over."
+          },
+          "forced_board": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 8.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forced Board",
+            "description": "The board the current player must play in; null means a free move."
+          },
+          "playable_boards": {
+            "items": {
+              "type": "integer",
+              "maximum": 8.0,
+              "minimum": 0.0
+            },
+            "type": "array",
+            "title": "Playable Boards"
+          },
+          "move_count": {
+            "type": "integer",
+            "title": "Move Count"
+          },
+          "boards": {
+            "items": {
+              "$ref": "#/components/schemas/SmallBoardOut"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "minItems": 9,
+            "title": "Boards"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "created_at",
+          "status",
+          "current_player",
+          "forced_board",
+          "playable_boards",
+          "move_count",
+          "boards"
+        ],
+        "title": "GameOut"
+      },
+      "GameStatus": {
+        "type": "string",
+        "enum": [
+          "in_progress",
+          "x_won",
+          "o_won",
+          "draw"
+        ],
+        "title": "GameStatus"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthResponse"
+      },
+      "MoveIn": {
+        "properties": {
+          "board": {
+            "type": "integer",
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Board"
+          },
+          "cell": {
+            "type": "integer",
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Cell"
+          }
+        },
+        "type": "object",
+        "required": [
+          "board",
+          "cell"
+        ],
+        "title": "MoveIn"
+      },
+      "Player": {
+        "type": "string",
+        "enum": [
+          "x",
+          "o"
+        ],
+        "title": "Player"
+      },
+      "SmallBoardOut": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Index"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BoardStatus"
+          },
+          "cells": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Player"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "maxItems": 9,
+            "minItems": 9,
+            "title": "Cells"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "status",
+          "cells"
+        ],
+        "title": "SmallBoardOut"
+      }
+    }
+  }
+}

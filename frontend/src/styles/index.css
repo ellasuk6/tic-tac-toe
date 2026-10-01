@@ -1,0 +1,20 @@
+/* Tailwind v4: CSS-first config. There is no tailwind.config.js in v4. */
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Georgia", "Times New Roman", serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-paper: #f7f3ea; /* page background */
+  --color-ink: #1f2430; /* text and grid lines */
+  --color-muted: #6b6f7a;
+  --color-x: #1d4ed8; /* player X marks */
+  --color-o: #c2410c; /* player O marks */
+  --color-play: #fde68a; /* highlight on boards you may play in */
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

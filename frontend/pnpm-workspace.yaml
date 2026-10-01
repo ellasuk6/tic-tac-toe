@@ -1,0 +1,12 @@
+# pnpm settings (pnpm 11+ keeps them here rather than in package.json).
+
+# pnpm refuses packages published in the last day or so unless listed here.
+# pnpm added this entry itself when `globals` was installed.
+minimumReleaseAgeExclude:
+  - globals@17.13.0
+
+# pnpm 12 stops an install if a package's install script has not been reviewed.
+# msw's script only copies a browser helper file; our tests run msw in Node, so
+# it is not needed. Without this line `pnpm install` fails, including in Docker.
+allowBuilds:
+  msw: false
