@@ -32,9 +32,6 @@ docker compose down -v    # stop and delete all saved games
 - If every board is decided and nobody has three in a row, the game is a draw.
 - **New Game** starts over at any time. A game's address survives a refresh.
 
-The open questions about these requirements, and the assumptions made for each, are in
-[`DECISIONS.md`](DECISIONS.md) (entries D2 and D3).
-
 ## How it is built
 
 ```
