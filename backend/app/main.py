@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api.v1.errors import register_error_handlers
 from app.api.v1.router import api_router
 from app.core.database import engine
 
@@ -20,3 +21,4 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(title="Ultimate Tic-Tac-Toe API", version="0.1.0", lifespan=lifespan)
 app.include_router(api_router)
+register_error_handlers(app)

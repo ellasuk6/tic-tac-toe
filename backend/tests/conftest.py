@@ -20,10 +20,10 @@ from pathlib import Path  # noqa: E402
 import pytest  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402
 from sqlalchemy import Engine  # noqa: E402
-from sqlalchemy.orm import Session  # noqa: E402
+from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
 
 import app.models.game  # noqa: E402, F401  (registers the tables on Base.metadata)
-from app.core.database import Base, create_db_engine  # noqa: E402
+from app.core.database import Base, create_db_engine, get_session  # noqa: E402
 from app.main import app  # noqa: E402
 
 
@@ -34,18 +34,27 @@ def anyio_backend() -> str:
 
 
 @pytest.fixture
-async def client() -> AsyncIterator[AsyncClient]:
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as c:
-        yield c
-
-
-@pytest.fixture
 def db_engine(tmp_path: Path) -> Iterator[Engine]:
     engine = create_db_engine(f"sqlite:///{tmp_path / 'test.db'}")
     Base.metadata.create_all(engine)
     yield engine
     engine.dispose()
+
+
+@pytest.fixture
+async def client(db_engine: Engine) -> AsyncIterator[AsyncClient]:
+    """An HTTP client for the app, wired to this test's own database."""
+    factory = sessionmaker(bind=db_engine, autoflush=False, expire_on_commit=False)
+
+    def override_get_session() -> Iterator[Session]:
+        with factory() as s:
+            yield s
+
+    app.dependency_overrides[get_session] = override_get_session
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as c:
+        yield c
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 """Domain error types.
 
-Services raise these. They know nothing about HTTP. In Stage 5 the API layer
-gets one exception handler that turns any DomainError into the constitution's
+Services raise these. They know nothing about HTTP. The API layer
+(app/api/v1/errors.py) turns each kind into a status code and the constitution's
 error envelope: {"code": ..., "detail": ...}.
 """
 
@@ -14,6 +14,14 @@ class DomainError(Exception):
     def __init__(self, detail: str) -> None:
         super().__init__(detail)
         self.detail = detail
+
+
+class NotFoundError(DomainError):
+    """The requested thing does not exist (the API will answer 404)."""
+
+
+class GameNotFoundError(NotFoundError):
+    code = "game_not_found"
 
 
 class RuleViolationError(DomainError):
@@ -38,3 +46,9 @@ class BoardDecidedError(RuleViolationError):
 
 class CellOccupiedError(RuleViolationError):
     code = "cell_occupied"
+
+
+class MoveConflictError(RuleViolationError):
+    """Another move was saved for this game at the same moment (e.g. a double click)."""
+
+    code = "move_conflict"

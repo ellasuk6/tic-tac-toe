@@ -37,7 +37,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.isort]
 # Our migrations folder is named "alembic", like the library. Tell Ruff which is which.
-known-first-party = ["app"]
+known-first-party = ["app", "tests"]
 known-third-party = ["alembic"]
 
 [tool.mypy]
